@@ -1,27 +1,68 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 
 const logo = require("../images/logo.png");
 
 export default function Register() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const handleSubmit = (e) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Hier kun je je registratie logica toevoegen
-    if (!email || !password || !confirmPassword) {
+
+    if (!name || !email || !password || !confirmPassword) {
       setError("Vul alle velden in.");
       return;
     }
+
     if (password !== confirmPassword) {
       setError("Wachtwoorden komen niet overeen.");
       return;
     }
+
+    setIsLoading(true);
     setError("");
-    // Simuleer registratie
-    alert("Registreren... (vervang door echte registratie)");
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            password_confirmation: confirmPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const validationErrors = data.errors
+          ? Object.values(data.errors).flat().join(" ")
+          : "Registreren mislukt.";
+        setError(data.message || validationErrors);
+        return;
+      }
+
+      navigate("/");
+    } catch {
+      setError("Kan geen verbinding maken met de server.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -33,6 +74,13 @@ export default function Register() {
       />
       <form onSubmit={handleSubmit} className="auth-form">
         <h2 className="auth-title">Maak een account aan</h2>
+        <input
+          type="text"
+          placeholder="Naam"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="auth-input"
+        />
         <input
           type="email"
           placeholder="E-mail"
@@ -55,12 +103,12 @@ export default function Register() {
           className="auth-input"
         />
         {error && <p className="auth-error">{error}</p>}
-        <button type="submit" className="auth-primary-btn">
-          Registreren
+        <button type="submit" className="auth-primary-btn" disabled={isLoading}>
+          {isLoading ? "Bezig met registreren..." : "Registreren"}
         </button>
         <button
           type="button"
-          onClick={() => (window.location.href = "/login")}
+          onClick={() => navigate("/")}
           className="auth-secondary-btn"
         >
           Terug naar inloggen

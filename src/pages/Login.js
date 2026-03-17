@@ -1,23 +1,56 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 
 const logo = require("../images/logo.png");
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Hier kun je je login logica toevoegen
+
     if (!email || !password) {
       setError("Vul alle velden in.");
       return;
     }
+
+    setIsLoading(true);
     setError("");
-    // Simuleer login
-    alert("Inloggen... (vervang door echte login)");
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Inloggen mislukt.");
+        return;
+      }
+
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("authUser", JSON.stringify(data.user));
+
+      navigate("/dashboard");
+    } catch {
+      setError("Kan geen verbinding maken met de server.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,8 +85,9 @@ export default function Login() {
         <button
           type="submit"
           className="auth-primary-btn"
+          disabled={isLoading}
         >
-          Inloggen
+          {isLoading ? "Bezig met inloggen..." : "Inloggen"}
         </button>
         <button
           type="button"
