@@ -15,6 +15,7 @@ export default function EditRecipe() {
 	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const [error, setError] = useState("");
 	const [imageFile, setImageFile] = useState(null);
 	const [currentImage, setCurrentImage] = useState("");
@@ -127,6 +128,44 @@ export default function EditRecipe() {
 		}
 	};
 
+	const handleDelete = async () => {
+		setError("");
+		if (!window.confirm("Weet je zeker dat je dit recept wil verwijderen?")) {
+			return;
+		}
+
+		const token = localStorage.getItem("authToken");
+		if (!token) {
+			navigate("/");
+			return;
+		}
+
+		setIsDeleting(true);
+		try {
+			const response = await fetch(
+				`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/recipes/${id}`,
+				{
+					method: "DELETE",
+					headers: {
+						Accept: "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				const data = await response.json().catch(() => ({}));
+				throw new Error(data.message || "Recept verwijderen is mislukt.");
+			}
+
+			navigate("/dashboard");
+		} catch (deleteError) {
+			setError(deleteError.message || "Er ging iets mis bij verwijderen.");
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
 	return (
 		<div className="recipes-page">
 			<NavBar onLogout={handleLogout} />
@@ -175,10 +214,13 @@ export default function EditRecipe() {
 						{!imageFile && currentImage && <img src={currentImage} alt={form.title} className="edit-recipe-preview" />}
 
 						<div className="recipe-form-actions">
+							<button type="button" className="recipe-view-btn recipe-delete-btn" onClick={handleDelete} disabled={isDeleting || isSaving}>
+								{isDeleting ? "Verwijderen..." : "Verwijderen"}
+							</button>
 							<button type="button" className="recipe-view-btn" onClick={() => navigate("/dashboard")}>
 								Annuleren
 							</button>
-							<button type="submit" className="recipe-view-btn" disabled={isSaving}>
+							<button type="submit" className="recipe-view-btn" disabled={isSaving || isDeleting}>
 								{isSaving ? "Opslaan..." : "Wijzigingen opslaan"}
 							</button>
 						</div>
