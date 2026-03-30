@@ -60,6 +60,40 @@ export default function Dashboard() {
     navigate("/");
   };
 
+  const handleDeleteRecipe = async (recipeId) => {
+    if (!window.confirm("Weet je zeker dat je dit recept wil verwijderen?")) {
+      return;
+    }
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/recipes/${recipeId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Kon recept niet verwijderen.");
+      }
+
+      setMyRecipes(myRecipes.filter((recipe) => recipe.id !== recipeId));
+    } catch (deleteError) {
+      setError(deleteError.message || "Er ging iets mis bij het verwijderen.");
+    }
+  };
+
   return (
     <div className="dashboard-page">
       <NavBar onLogout={handleLogout} />
@@ -73,7 +107,7 @@ export default function Dashboard() {
             <h2>Jouw Recepten</h2>
             <div className="section-actions">
               <button className="recipe-view-btn" onClick={() => navigate("/add-recipe")}>+ Toevoegen</button>
-              <span onClick={() => navigate("/recipes")} style={{ cursor: "pointer" }}>Bekijk alles</span>
+              
             </div>
           </div>
 
@@ -91,7 +125,10 @@ export default function Dashboard() {
                   </div>
                   <h3>{recipe.title}</h3>
                   <p>{recipe.category || "Geen categorie"}</p>
-                  <button className="recipe-view-btn" onClick={() => navigate(`/edit-recipe/${recipe.id}`)}>Bewerken</button>
+                  <div className="recipe-card-actions">
+                    <button className="recipe-view-btn" onClick={() => navigate(`/edit-recipe/${recipe.id}`)}>Bewerken</button>
+                    <button className="recipe-view-btn recipe-delete-btn" onClick={() => handleDeleteRecipe(recipe.id)}>Verwijderen</button>
+                  </div>
                 </article>
               ))
             )}

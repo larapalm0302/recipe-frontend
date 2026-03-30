@@ -92,6 +92,7 @@ export default function EditRecipe() {
 		setIsSaving(true);
 		try {
 			const payload = new FormData();
+			payload.append("_method", "PUT");
 			payload.append("title", form.title);
 			payload.append("category", form.category);
 			payload.append("description", form.description);
@@ -104,7 +105,7 @@ export default function EditRecipe() {
 			const response = await fetch(
 				`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/recipes/${id}`,
 				{
-					method: "PUT",
+					method: "POST",
 					headers: {
 						Accept: "application/json",
 						Authorization: `Bearer ${token}`,

@@ -143,6 +143,24 @@
   font-size: 14px;
 }
 
+.recipe-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.recipe-card-actions .recipe-view-btn {
+  flex: 1;
+}
+
+.recipe-delete-btn {
+  color: #9c2f2f !important;
+  border-color: #9c2f2f !important;
+}
+
+.recipe-delete-btn:hover {
+  background: #f7e8e8;
+}
+
 .edit-recipe-preview {
   width: 100%;
   max-width: 320px;
