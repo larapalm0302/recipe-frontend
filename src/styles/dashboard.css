@@ -74,6 +74,12 @@
   font-size: 18px;
 }
 
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .recipe-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -91,8 +97,16 @@
   position: relative;
   height: 120px;
   border-radius: 10px;
+  overflow: hidden;
   background: linear-gradient(135deg, #d2b69a, #f4eadf);
   margin-bottom: 10px;
+}
+
+.recipe-image-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .recipe-image .con-like {
@@ -127,6 +141,13 @@
   padding: 6px 10px;
   cursor: pointer;
   font-size: 14px;
+}
+
+.edit-recipe-preview {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 10px;
+  border: 1px solid #d7b79a;
 }
 
 @media (max-width: 900px) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
 import NavBar from "../components/NavBar";
@@ -6,15 +6,53 @@ import FavoriteButton from "../components/FavoriteButton";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [error] = useState("");
+  const [error, setError] = useState("");
+  const [isLoadingMyRecipes, setIsLoadingMyRecipes] = useState(true);
 
   const storedUser = localStorage.getItem("authUser");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const firstName = user?.name ? user.name.split(" ")[0] : "Bakker";
 
-  const myRecipes = [];
+  const [myRecipes, setMyRecipes] = useState([]);
 
   const favoriteRecipes = [];
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    const fetchMyRecipes = async () => {
+      try {
+        setError("");
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/my-recipes`,
+          {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.message || "Kon jouw recepten niet ophalen.");
+        }
+
+        const data = await response.json();
+        setMyRecipes(Array.isArray(data) ? data : []);
+      } catch (fetchError) {
+        setError(fetchError.message || "Er ging iets mis bij het ophalen van recepten.");
+      } finally {
+        setIsLoadingMyRecipes(false);
+      }
+    };
+
+    fetchMyRecipes();
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -33,21 +71,27 @@ export default function Dashboard() {
         <section className="dashboard-section">
           <div className="section-head">
             <h2>Jouw Recepten</h2>
-            <span onClick={() => navigate("/recipes")} style={{ cursor: "pointer" }}>Bekijk alles</span>
+            <div className="section-actions">
+              <button className="recipe-view-btn" onClick={() => navigate("/add-recipe")}>+ Toevoegen</button>
+              <span onClick={() => navigate("/recipes")} style={{ cursor: "pointer" }}>Bekijk alles</span>
+            </div>
           </div>
 
           <div className="recipe-grid">
-            {myRecipes.length === 0 ? (
+            {isLoadingMyRecipes ? (
+              <p>Jouw recepten laden...</p>
+            ) : myRecipes.length === 0 ? (
               <p>Je hebt nog geen eigen recepten.</p>
             ) : (
               myRecipes.map((recipe) => (
-                <article key={recipe.title} className="recipe-card">
+                <article key={recipe.id} className="recipe-card">
                   <div className="recipe-image">
+                    {recipe.image ? <img src={recipe.image} alt={recipe.title} className="recipe-image-img" /> : null}
                     <FavoriteButton />
                   </div>
                   <h3>{recipe.title}</h3>
-                  <p>{recipe.tag}</p>
-                  <button className="recipe-view-btn" onClick={() => navigate("/recipes")}>Bekijk recept</button>
+                  <p>{recipe.category || "Geen categorie"}</p>
+                  <button className="recipe-view-btn" onClick={() => navigate(`/edit-recipe/${recipe.id}`)}>Bewerken</button>
                 </article>
               ))
             )}

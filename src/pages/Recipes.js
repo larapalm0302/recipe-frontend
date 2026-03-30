@@ -41,15 +41,15 @@ export default function Recipes() {
 				<div className="recipes-grid">
 					{recipes.map((recipe) => (
 						<article key={recipe.title} className="recipes-card">
-						<div className="recipes-image">
-							<img src={recipe.image} alt={recipe.title} className="recipes-image-img" />
-							<FavoriteButton />
-						</div>
-						<h3>{recipe.title}</h3>
-						<p>{recipe.category}</p>
-						<button  className="recipe-view-btn" onClick={() => navigate("/recipes")}>
-							Bekijk recept
-						</button>
+							<div className="recipes-image">
+								<img src={recipe.image} alt={recipe.title} className="recipes-image-img" />
+								<FavoriteButton />
+							</div>
+							<h3>{recipe.title}</h3>
+							<p>{recipe.category}</p>
+							<button className="recipe-view-btn" onClick={() => navigate("/recipes")}>
+								Bekijk recept
+							</button>
 						</article>
 					))}
 				</div>

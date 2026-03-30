@@ -18,6 +18,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12px;
 	margin-bottom: 16px;
 }
 
@@ -90,6 +91,58 @@
   padding: 6px 10px;
   cursor: pointer;
   font-size: 14px;
+}
+
+.recipe-view-btn:hover {
+	background: #f7efe5;
+}
+
+.recipes-add-btn {
+	font-weight: 700;
+}
+
+.recipes-error {
+	margin: 0 0 12px;
+	color: #9c2f2f;
+}
+
+.recipe-form {
+	display: grid;
+	gap: 12px;
+}
+
+.recipe-form label {
+	display: grid;
+	gap: 6px;
+	font-weight: 600;
+}
+
+.recipe-form input,
+.recipe-form textarea {
+	width: 100%;
+	border: 1px solid #d7b79a;
+	border-radius: 8px;
+	padding: 10px;
+	font-size: 14px;
+	background: #fff;
+	color: #6d4025;
+}
+
+.recipe-form textarea {
+	resize: vertical;
+}
+
+.recipe-form-actions {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+}
+
+.edit-recipe-preview {
+	width: 100%;
+	max-width: 320px;
+	border-radius: 10px;
+	border: 1px solid #d7b79a;
 }
 
 @media (max-width: 900px) {
